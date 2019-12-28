@@ -52,16 +52,17 @@ class KeyValueView(View):
     def patch(self, request):
         print('re...')
         if 'key_values' in request.session:
-            print('inside key-values')
-            key_value_data_update = json.loads(request.body)
-            # key = key_value_data_update.get('eyakub')
-            print(key_value_data_update)
+            key_value_data_update = dict(request.session['key_values'])
         else:
-            key_value_data_update = {}
-        
+            key_value_data_update = ({})
         keys = list(key_value_data_update.keys())
-        print('body...', key_value_data_update)
+        update_data = json.loads(request.body)
+        for k, v in update_data.items():
+            if k in keys:
+                update_data[k] = v
+        request.session['key_values'] = update_data
+        request.session.set_expiry(300)
         return JsonResponse(
             {'message': 'Data updated successfully.'},
-            status = 200
+            status = 204
         )
