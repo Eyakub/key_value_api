@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+import json
 
 
 class KeyValueView(View):
@@ -21,7 +22,7 @@ class KeyValueView(View):
                 'eyakub': 'sorkar',
                 'sorkar': 'eyakub',
             }
-            request.session['key_value_data'] = key_value_data
+            request.session['key_values'] = key_value_data
             request.session.set_expiry(60)
         elif 'key_values' in request.session:
             key_value_data = request.session['key_values']
@@ -49,10 +50,12 @@ class KeyValueView(View):
         )
 
     def patch(self, request):
-        print('re...', request.session['key_values'])
+        print('re...')
         if 'key_values' in request.session:
             print('inside key-values')
-            key_value_data_update =json.loads(request.body)
+            key_value_data_update = json.loads(request.body)
+            # key = key_value_data_update.get('eyakub')
+            print(key_value_data_update)
         else:
             key_value_data_update = {}
         
