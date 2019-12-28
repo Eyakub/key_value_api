@@ -17,14 +17,7 @@ class KeyValueView(View):
             }
             return JsonResponse(response, status=405)
     def get(self, request):
-        if 'key_values' not in request.session:
-            key_value_data = {
-                'eyakub': 'sorkar',
-                'sorkar': 'eyakub',
-            }
-            request.session['key_values'] = key_value_data
-            request.session.set_expiry(60)
-        elif 'key_values' in request.session:
+        if 'key_values' in request.session:
             key_value_data = request.session['key_values']
         else:
             key_value_data = {}
@@ -33,35 +26,41 @@ class KeyValueView(View):
             keys = request.GET.get('keys').split(',')
             key_value_data = {k: v for (k, v) in key_value_data.items() if k in keys}
 
-        request.session.set_expiry(300)
+        request.session.set_expiry(30)
+
         return JsonResponse(data=key_value_data, status=200)
         
     def post(self, request):
         if 'key_values' in request.session:
             key_value_data = dict(request.session['key_values'])
-            key_value_data.update(request.POST.dict())
+            body = json.loads(request.body)
+            key_value_data.update(body)
             request.session['key_values'] = key_value_data
         else:
-            request.session['key_values'] = request.POST.dict()
-        request.session.set_expiry(300)
+            request.session['key_values'] = json.loads(request.body)
+
+        request.session.set_expiry(30)
+
         return JsonResponse(
             {'message': 'Data stored successfully'},
             status=200
         )
 
     def patch(self, request):
-        print('re...')
         if 'key_values' in request.session:
             key_value_data_update = dict(request.session['key_values'])
         else:
             key_value_data_update = ({})
         keys = list(key_value_data_update.keys())
         update_data = json.loads(request.body)
+
         for k, v in update_data.items():
             if k in keys:
-                update_data[k] = v
-        request.session['key_values'] = update_data
-        request.session.set_expiry(300)
+                key_value_data_update[k] = v
+
+        request.session['key_values'] = key_value_data_update
+        request.session.set_expiry(30)
+
         return JsonResponse(
             {'message': 'Data updated successfully.'},
             status = 204
