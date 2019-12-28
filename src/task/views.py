@@ -16,33 +16,49 @@ class KeyValueView(View):
             }
             return JsonResponse(response, status=405)
     def get(self, request):
-
-        # if there is any data exist in session
-        if 'key_value_data' not in request.session:
+        if 'key_values' not in request.session:
             key_value_data = {
                 'eyakub': 'sorkar',
                 'sorkar': 'eyakub',
             }
             request.session['key_value_data'] = key_value_data
             request.session.set_expiry(60)
-        elif 'key_value_data' in request.session:
-            key_value_data = request.session['key_value_data']
+        elif 'key_values' in request.session:
+            key_value_data = request.session['key_values']
         else:
             key_value_data = {}
         
         if len(request.GET.getlist('keys')) > 0:
             keys = request.GET.get('keys').split(',')
-            print('key.s...', keys)
-            key_value_data = {
-                key: value for (key, value) in key_value_data.items() if key in keys
-            }
-            for k, v in key_value_data.items():
-                if k in keys:
-                    print('key found...')
-                    key_value_data = {k: v}
+            key_value_data = {k: v for (k, v) in key_value_data.items() if k in keys}
 
         request.session.set_expiry(300)
         return JsonResponse(data=key_value_data, status=200)
         
+    def post(self, request):
+        if 'key_values' in request.session:
+            key_value_data = dict(request.session['key_values'])
+            key_value_data.update(request.POST.dict())
+            request.session['key_values'] = key_value_data
+        else:
+            request.session['key_values'] = request.POST.dict()
+        request.session.set_expiry(300)
+        return JsonResponse(
+            {'message': 'Data stored successfully'},
+            status=200
+        )
 
+    def patch(self, request):
+        print('re...', request.session['key_values'])
+        if 'key_values' in request.session:
+            print('inside key-values')
+            key_value_data_update =json.loads(request.body)
+        else:
+            key_value_data_update = {}
         
+        keys = list(key_value_data_update.keys())
+        print('body...', key_value_data_update)
+        return JsonResponse(
+            {'message': 'Data updated successfully.'},
+            status = 200
+        )
