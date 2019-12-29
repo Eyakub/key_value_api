@@ -26,7 +26,7 @@ class KeyValueView(View):
             keys = request.GET.get('keys').split(',')
             key_value_data = {k: v for (k, v) in key_value_data.items() if k in keys}
 
-        request.session.set_expiry(30)
+        request.session.set_expiry(300)
 
         return JsonResponse(data=key_value_data, status=200)
         
@@ -37,9 +37,9 @@ class KeyValueView(View):
             key_value_data.update(body)
             request.session['key_values'] = key_value_data
         else:
-            request.session['key_values'] = json.loads(request.body)
+            request.session['key_values'] = dict(json.loads(request.body))
 
-        request.session.set_expiry(30)
+        request.session.set_expiry(300)
 
         return JsonResponse(
             {'message': 'Data stored successfully'},
@@ -59,7 +59,7 @@ class KeyValueView(View):
                 key_value_data_update[k] = v
 
         request.session['key_values'] = key_value_data_update
-        request.session.set_expiry(30)
+        request.session.set_expiry(300)
 
         return JsonResponse(
             {'message': 'Data updated successfully.'},
